@@ -13,12 +13,12 @@ import { useApp } from "@/store/app-store";
 import { isOpenNow } from "@/config/restaurant";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+const navItems: Array<{ to: string; label: string; icon: typeof User }> = [
   { to: "/cardapio", label: "Cardápio", icon: UtensilsCrossed },
   { to: "/historico", label: "Pedidos", icon: Receipt },
   { to: "/enderecos", label: "Endereços", icon: MapPin },
   { to: "/perfil", label: "Perfil", icon: User },
-] as const;
+];
 
 export function ClientLayout({
   children,

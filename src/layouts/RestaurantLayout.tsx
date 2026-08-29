@@ -15,7 +15,7 @@ import { useState, type ReactNode } from "react";
 import { useApp } from "@/store/app-store";
 import { cn } from "@/lib/utils";
 
-const links = [
+const links: Array<{ to: string; label: string; icon: typeof Store; exact?: boolean }> = [
   { to: "/restaurante", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/restaurante/pedidos", label: "Pedidos", icon: ShoppingBag },
   { to: "/restaurante/cardapio", label: "Cardápio", icon: UtensilsCrossed },
@@ -23,7 +23,7 @@ const links = [
   { to: "/restaurante/clientes", label: "Clientes", icon: Users },
   { to: "/restaurante/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/restaurante/configuracoes", label: "Configurações", icon: Settings },
-] as const;
+];
 
 export function RestaurantLayout({
   title,
