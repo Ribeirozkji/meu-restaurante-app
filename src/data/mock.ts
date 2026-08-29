@@ -110,7 +110,7 @@ export const mockProducts: Product[] = seeds.map((seed, index) => {
 /** Produtos em promoção também aparecem na categoria "Promoções". */
 export const promoProductIds = ["p1", "p3", "p9", "p19"];
 
-export const mockCustomers: Customer[] = [
+const customerSeeds: Array<[string, string, string, string, string]> = [
   ["João Silva", "(81) 99999-1234", "joao.silva@email.com", "Boa Viagem", "Rua Exemplo, 100"],
   ["Maria Souza", "(81) 98888-2201", "maria.souza@email.com", "Pina", "Av. Central, 450"],
   ["Carlos Pereira", "(81) 97777-3312", "carlos.pereira@email.com", "Imbiribeira", "Rua das Acácias, 78"],
@@ -121,11 +121,14 @@ export const mockCustomers: Customer[] = [
   ["Fernanda Alves", "(81) 92222-8867", "fernanda.alves@email.com", "Pina", "Rua Antônio Falcão, 210"],
   ["Lucas Martins", "(81) 91111-9978", "lucas.martins@email.com", "Torre", "Rua Real da Torre, 620"],
   ["Camila Rocha", "(81) 90000-1089", "camila.rocha@email.com", "Casa Forte", "Rua Fernandes Vieira, 88"],
-].map(([name, phone, email, district, address], i) => ({
+];
+
+export const mockCustomers: Customer[] = customerSeeds.map(([name, phone, email, district, address], i) => ({
   id: `c${i + 1}`,
   name,
   phone,
   email,
+
   avatar: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(name)}`,
   district,
   address,
