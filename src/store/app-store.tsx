@@ -45,7 +45,7 @@ interface AppStore extends PersistedState {
   customers: typeof mockCustomers;
   dailyClosings: typeof mockDailyClosings;
   customer: typeof currentCustomer;
-  selectedAddress?: Address;
+  selectedAddress: Address | undefined;
   cartSubtotal: number;
   cartCount: number;
   deliveryFee: number;

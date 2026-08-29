@@ -212,7 +212,7 @@ function buildOrders(): Order[] {
   const now = new Date(2026, 7, 29, 12, 0, 0);
 
   for (let i = 0; i < 30; i++) {
-    const customer = mockCustomers[pseudo(i, mockCustomers.length)];
+    const customer = mockCustomers[pseudo(i, mockCustomers.length)]!;
     const daysAgo = Math.floor(i / 2);
     const created = new Date(now);
     created.setDate(created.getDate() - daysAgo);
@@ -221,7 +221,7 @@ function buildOrders(): Order[] {
     const itemCount = 1 + pseudo(i, 3);
     const items: OrderItem[] = [];
     for (let j = 0; j < itemCount; j++) {
-      const product = mockProducts[pseudo(i * 5 + j * 3, mockProducts.length)];
+      const product = mockProducts[pseudo(i * 5 + j * 3, mockProducts.length)]!;
       const quantity = 1 + pseudo(i + j, 2);
       items.push({
         productId: product.id,
@@ -233,8 +233,8 @@ function buildOrders(): Order[] {
     const subtotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
     const distanceKm = Math.round((1.5 + pseudo(i, 70) / 10) * 10) / 10;
     const deliveryFee = calculateDeliveryFee(distanceKm);
-    const status = daysAgo === 0 ? statuses[pseudo(i, 4)] : statuses[3 + pseudo(i, 3)];
-    const payment = payments[pseudo(i, payments.length)];
+    const status = daysAgo === 0 ? statuses[pseudo(i, 4)]! : statuses[3 + pseudo(i, 3)]!;
+    const payment = payments[pseudo(i, payments.length)]!;
 
     orders.push({
       id: `o${i + 1}`,
@@ -261,7 +261,7 @@ function buildOrders(): Order[] {
 export const mockOrders: Order[] = buildOrders();
 
 /** Cliente logado (mock). */
-export const currentCustomer = mockCustomers[4];
+export const currentCustomer = mockCustomers[4]!;
 
 export function buildDailyClosings(): DailyClosing[] {
   const base = new Date(2026, 7, 29);
