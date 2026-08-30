@@ -16,8 +16,10 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as EnderecosRouteImport } from './routes/enderecos'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as RestauranteRouteImport } from './routes/restaurante'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
+import { Route as RestauranteIndexRouteImport } from './routes/restaurante.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -54,6 +56,11 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RestauranteRoute = RestauranteRouteImport.update({
+  id: '/restaurante',
+  path: '/restaurante',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PedidoIdRoute = PedidoIdRouteImport.update({
   id: '/pedido/$id',
   path: '/pedido/$id',
@@ -64,6 +71,11 @@ const ProdutoIdRoute = ProdutoIdRouteImport.update({
   path: '/produto/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RestauranteIndexRoute = RestauranteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RestauranteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,8 +85,10 @@ export interface FileRoutesByFullPath {
   '/enderecos': typeof EnderecosRoute
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
+  '/restaurante': typeof RestauranteRouteWithChildren
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante/': typeof RestauranteIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +100,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof PerfilRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante': typeof RestauranteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,8 +111,10 @@ export interface FileRoutesById {
   '/enderecos': typeof EnderecosRoute
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
+  '/restaurante': typeof RestauranteRouteWithChildren
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante/': typeof RestauranteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,8 +126,10 @@ export interface FileRouteTypes {
     | '/enderecos'
     | '/historico'
     | '/perfil'
+    | '/restaurante'
     | '/pedido/$id'
     | '/produto/$id'
+    | '/restaurante/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +141,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pedido/$id'
     | '/produto/$id'
+    | '/restaurante'
   id:
     | '__root__'
     | '/'
@@ -131,8 +151,10 @@ export interface FileRouteTypes {
     | '/enderecos'
     | '/historico'
     | '/perfil'
+    | '/restaurante'
     | '/pedido/$id'
     | '/produto/$id'
+    | '/restaurante/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,6 +165,7 @@ export interface RootRouteChildren {
   EnderecosRoute: typeof EnderecosRoute
   HistoricoRoute: typeof HistoricoRoute
   PerfilRoute: typeof PerfilRoute
+  RestauranteRoute: typeof RestauranteRouteWithChildren
   PedidoIdRoute: typeof PedidoIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
 }
@@ -198,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/restaurante': {
+      id: '/restaurante'
+      path: '/restaurante'
+      fullPath: '/restaurante'
+      preLoaderRoute: typeof RestauranteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pedido/$id': {
       id: '/pedido/$id'
       path: '/pedido/$id'
@@ -212,8 +242,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProdutoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/restaurante/': {
+      id: '/restaurante/'
+      path: '/'
+      fullPath: '/restaurante/'
+      preLoaderRoute: typeof RestauranteIndexRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
   }
 }
+
+interface RestauranteRouteChildren {
+  RestauranteIndexRoute: typeof RestauranteIndexRoute
+}
+
+const RestauranteRouteChildren: RestauranteRouteChildren = {
+  RestauranteIndexRoute: RestauranteIndexRoute,
+}
+
+const RestauranteRouteWithChildren = RestauranteRoute._addFileChildren(
+  RestauranteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -223,6 +272,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnderecosRoute: EnderecosRoute,
   HistoricoRoute: HistoricoRoute,
   PerfilRoute: PerfilRoute,
+  RestauranteRoute: RestauranteRouteWithChildren,
   PedidoIdRoute: PedidoIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,
 }
