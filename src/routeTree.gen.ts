@@ -10,33 +10,164 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CardapioRouteImport } from './routes/cardapio'
+import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as EnderecosRouteImport } from './routes/enderecos'
+import { Route as HistoricoRouteImport } from './routes/historico'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as RestauranteRouteImport } from './routes/restaurante'
+import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
+import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
+import { Route as RestauranteIndexRouteImport } from './routes/restaurante.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CardapioRoute = CardapioRouteImport.update({
+  id: '/cardapio',
+  path: '/cardapio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnderecosRoute = EnderecosRouteImport.update({
+  id: '/enderecos',
+  path: '/enderecos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoricoRoute = HistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestauranteRoute = RestauranteRouteImport.update({
+  id: '/restaurante',
+  path: '/restaurante',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoIdRoute = PedidoIdRouteImport.update({
+  id: '/pedido/$id',
+  path: '/pedido/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutoIdRoute = ProdutoIdRouteImport.update({
+  id: '/produto/$id',
+  path: '/produto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestauranteIndexRoute = RestauranteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RestauranteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cardapio': typeof CardapioRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/checkout': typeof CheckoutRoute
+  '/enderecos': typeof EnderecosRoute
+  '/historico': typeof HistoricoRoute
+  '/perfil': typeof PerfilRoute
+  '/restaurante': typeof RestauranteRouteWithChildren
+  '/pedido/$id': typeof PedidoIdRoute
+  '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante/': typeof RestauranteIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cardapio': typeof CardapioRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/checkout': typeof CheckoutRoute
+  '/enderecos': typeof EnderecosRoute
+  '/historico': typeof HistoricoRoute
+  '/perfil': typeof PerfilRoute
+  '/pedido/$id': typeof PedidoIdRoute
+  '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante': typeof RestauranteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cardapio': typeof CardapioRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/checkout': typeof CheckoutRoute
+  '/enderecos': typeof EnderecosRoute
+  '/historico': typeof HistoricoRoute
+  '/perfil': typeof PerfilRoute
+  '/restaurante': typeof RestauranteRouteWithChildren
+  '/pedido/$id': typeof PedidoIdRoute
+  '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante/': typeof RestauranteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/cardapio'
+    | '/carrinho'
+    | '/checkout'
+    | '/enderecos'
+    | '/historico'
+    | '/perfil'
+    | '/restaurante'
+    | '/pedido/$id'
+    | '/produto/$id'
+    | '/restaurante/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cardapio'
+    | '/carrinho'
+    | '/checkout'
+    | '/enderecos'
+    | '/historico'
+    | '/perfil'
+    | '/pedido/$id'
+    | '/produto/$id'
+    | '/restaurante'
+  id:
+    | '__root__'
+    | '/'
+    | '/cardapio'
+    | '/carrinho'
+    | '/checkout'
+    | '/enderecos'
+    | '/historico'
+    | '/perfil'
+    | '/restaurante'
+    | '/pedido/$id'
+    | '/produto/$id'
+    | '/restaurante/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CardapioRoute: typeof CardapioRoute
+  CarrinhoRoute: typeof CarrinhoRoute
+  CheckoutRoute: typeof CheckoutRoute
+  EnderecosRoute: typeof EnderecosRoute
+  HistoricoRoute: typeof HistoricoRoute
+  PerfilRoute: typeof PerfilRoute
+  RestauranteRoute: typeof RestauranteRouteWithChildren
+  PedidoIdRoute: typeof PedidoIdRoute
+  ProdutoIdRoute: typeof ProdutoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +179,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cardapio': {
+      id: '/cardapio'
+      path: '/cardapio'
+      fullPath: '/cardapio'
+      preLoaderRoute: typeof CardapioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enderecos': {
+      id: '/enderecos'
+      path: '/enderecos'
+      fullPath: '/enderecos'
+      preLoaderRoute: typeof EnderecosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historico': {
+      id: '/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof HistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restaurante': {
+      id: '/restaurante'
+      path: '/restaurante'
+      fullPath: '/restaurante'
+      preLoaderRoute: typeof RestauranteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$id': {
+      id: '/pedido/$id'
+      path: '/pedido/$id'
+      fullPath: '/pedido/$id'
+      preLoaderRoute: typeof PedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produto/$id': {
+      id: '/produto/$id'
+      path: '/produto/$id'
+      fullPath: '/produto/$id'
+      preLoaderRoute: typeof ProdutoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restaurante/': {
+      id: '/restaurante/'
+      path: '/'
+      fullPath: '/restaurante/'
+      preLoaderRoute: typeof RestauranteIndexRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
   }
 }
 
+interface RestauranteRouteChildren {
+  RestauranteIndexRoute: typeof RestauranteIndexRoute
+}
+
+const RestauranteRouteChildren: RestauranteRouteChildren = {
+  RestauranteIndexRoute: RestauranteIndexRoute,
+}
+
+const RestauranteRouteWithChildren = RestauranteRoute._addFileChildren(
+  RestauranteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CardapioRoute: CardapioRoute,
+  CarrinhoRoute: CarrinhoRoute,
+  CheckoutRoute: CheckoutRoute,
+  EnderecosRoute: EnderecosRoute,
+  HistoricoRoute: HistoricoRoute,
+  PerfilRoute: PerfilRoute,
+  RestauranteRoute: RestauranteRouteWithChildren,
+  PedidoIdRoute: PedidoIdRoute,
+  ProdutoIdRoute: ProdutoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
