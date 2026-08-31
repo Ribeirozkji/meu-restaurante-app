@@ -65,17 +65,24 @@ function Configuracoes() {
 
         <section className="card-surface p-5">
           <h2 className="text-sm font-bold text-foreground">Funcionamento</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 space-y-3">
             <Field
-              label="Abre às"
-              value={form.openTime}
-              onChange={(openTime) => setForm({ ...form, openTime })}
+              label="Horário de funcionamento"
+              value={form.openingHours}
+              onChange={(openingHours) => setForm({ ...form, openingHours })}
             />
-            <Field
-              label="Fecha às"
-              value={form.closeTime}
-              onChange={(closeTime) => setForm({ ...form, closeTime })}
-            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field
+                label="Abre às (hora)"
+                value={String(form.openFrom)}
+                onChange={(v) => setForm({ ...form, openFrom: Number(v) || 0 })}
+              />
+              <Field
+                label="Fecha às (hora)"
+                value={String(form.openTo)}
+                onChange={(v) => setForm({ ...form, openTo: Number(v) || 0 })}
+              />
+            </div>
           </div>
 
           <h2 className="mt-6 text-sm font-bold text-foreground">Pagamento PIX</h2>
@@ -84,11 +91,6 @@ function Configuracoes() {
               label="Chave PIX"
               value={form.pixKey}
               onChange={(pixKey) => setForm({ ...form, pixKey })}
-            />
-            <Field
-              label="Nome do recebedor"
-              value={form.pixReceiver}
-              onChange={(pixReceiver) => setForm({ ...form, pixReceiver })}
             />
           </div>
         </section>
