@@ -20,6 +20,12 @@ import { Route as RestauranteRouteImport } from './routes/restaurante'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as RestauranteIndexRouteImport } from './routes/restaurante.index'
+import { Route as RestauranteCardapioRouteImport } from './routes/restaurante.cardapio'
+import { Route as RestauranteClientesRouteImport } from './routes/restaurante.clientes'
+import { Route as RestauranteConfiguracoesRouteImport } from './routes/restaurante.configuracoes'
+import { Route as RestauranteEstoqueRouteImport } from './routes/restaurante.estoque'
+import { Route as RestaurantePedidosRouteImport } from './routes/restaurante.pedidos'
+import { Route as RestauranteRelatoriosRouteImport } from './routes/restaurante.relatorios'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +82,37 @@ const RestauranteIndexRoute = RestauranteIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RestauranteRoute,
 } as any)
+const RestauranteCardapioRoute = RestauranteCardapioRouteImport.update({
+  id: '/cardapio',
+  path: '/cardapio',
+  getParentRoute: () => RestauranteRoute,
+} as any)
+const RestauranteClientesRoute = RestauranteClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => RestauranteRoute,
+} as any)
+const RestauranteConfiguracoesRoute =
+  RestauranteConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => RestauranteRoute,
+  } as any)
+const RestauranteEstoqueRoute = RestauranteEstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => RestauranteRoute,
+} as any)
+const RestaurantePedidosRoute = RestaurantePedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => RestauranteRoute,
+} as any)
+const RestauranteRelatoriosRoute = RestauranteRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => RestauranteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -88,6 +125,12 @@ export interface FileRoutesByFullPath {
   '/restaurante': typeof RestauranteRouteWithChildren
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante/cardapio': typeof RestauranteCardapioRoute
+  '/restaurante/clientes': typeof RestauranteClientesRoute
+  '/restaurante/configuracoes': typeof RestauranteConfiguracoesRoute
+  '/restaurante/estoque': typeof RestauranteEstoqueRoute
+  '/restaurante/pedidos': typeof RestaurantePedidosRoute
+  '/restaurante/relatorios': typeof RestauranteRelatoriosRoute
   '/restaurante/': typeof RestauranteIndexRoute
 }
 export interface FileRoutesByTo {
@@ -100,6 +143,12 @@ export interface FileRoutesByTo {
   '/perfil': typeof PerfilRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante/cardapio': typeof RestauranteCardapioRoute
+  '/restaurante/clientes': typeof RestauranteClientesRoute
+  '/restaurante/configuracoes': typeof RestauranteConfiguracoesRoute
+  '/restaurante/estoque': typeof RestauranteEstoqueRoute
+  '/restaurante/pedidos': typeof RestaurantePedidosRoute
+  '/restaurante/relatorios': typeof RestauranteRelatoriosRoute
   '/restaurante': typeof RestauranteIndexRoute
 }
 export interface FileRoutesById {
@@ -114,6 +163,12 @@ export interface FileRoutesById {
   '/restaurante': typeof RestauranteRouteWithChildren
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
+  '/restaurante/cardapio': typeof RestauranteCardapioRoute
+  '/restaurante/clientes': typeof RestauranteClientesRoute
+  '/restaurante/configuracoes': typeof RestauranteConfiguracoesRoute
+  '/restaurante/estoque': typeof RestauranteEstoqueRoute
+  '/restaurante/pedidos': typeof RestaurantePedidosRoute
+  '/restaurante/relatorios': typeof RestauranteRelatoriosRoute
   '/restaurante/': typeof RestauranteIndexRoute
 }
 export interface FileRouteTypes {
@@ -129,6 +184,12 @@ export interface FileRouteTypes {
     | '/restaurante'
     | '/pedido/$id'
     | '/produto/$id'
+    | '/restaurante/cardapio'
+    | '/restaurante/clientes'
+    | '/restaurante/configuracoes'
+    | '/restaurante/estoque'
+    | '/restaurante/pedidos'
+    | '/restaurante/relatorios'
     | '/restaurante/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -141,6 +202,12 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pedido/$id'
     | '/produto/$id'
+    | '/restaurante/cardapio'
+    | '/restaurante/clientes'
+    | '/restaurante/configuracoes'
+    | '/restaurante/estoque'
+    | '/restaurante/pedidos'
+    | '/restaurante/relatorios'
     | '/restaurante'
   id:
     | '__root__'
@@ -154,6 +221,12 @@ export interface FileRouteTypes {
     | '/restaurante'
     | '/pedido/$id'
     | '/produto/$id'
+    | '/restaurante/cardapio'
+    | '/restaurante/clientes'
+    | '/restaurante/configuracoes'
+    | '/restaurante/estoque'
+    | '/restaurante/pedidos'
+    | '/restaurante/relatorios'
     | '/restaurante/'
   fileRoutesById: FileRoutesById
 }
@@ -249,14 +322,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestauranteIndexRouteImport
       parentRoute: typeof RestauranteRoute
     }
+    '/restaurante/cardapio': {
+      id: '/restaurante/cardapio'
+      path: '/cardapio'
+      fullPath: '/restaurante/cardapio'
+      preLoaderRoute: typeof RestauranteCardapioRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
+    '/restaurante/clientes': {
+      id: '/restaurante/clientes'
+      path: '/clientes'
+      fullPath: '/restaurante/clientes'
+      preLoaderRoute: typeof RestauranteClientesRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
+    '/restaurante/configuracoes': {
+      id: '/restaurante/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/restaurante/configuracoes'
+      preLoaderRoute: typeof RestauranteConfiguracoesRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
+    '/restaurante/estoque': {
+      id: '/restaurante/estoque'
+      path: '/estoque'
+      fullPath: '/restaurante/estoque'
+      preLoaderRoute: typeof RestauranteEstoqueRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
+    '/restaurante/pedidos': {
+      id: '/restaurante/pedidos'
+      path: '/pedidos'
+      fullPath: '/restaurante/pedidos'
+      preLoaderRoute: typeof RestaurantePedidosRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
+    '/restaurante/relatorios': {
+      id: '/restaurante/relatorios'
+      path: '/relatorios'
+      fullPath: '/restaurante/relatorios'
+      preLoaderRoute: typeof RestauranteRelatoriosRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
   }
 }
 
 interface RestauranteRouteChildren {
+  RestauranteCardapioRoute: typeof RestauranteCardapioRoute
+  RestauranteClientesRoute: typeof RestauranteClientesRoute
+  RestauranteConfiguracoesRoute: typeof RestauranteConfiguracoesRoute
+  RestauranteEstoqueRoute: typeof RestauranteEstoqueRoute
+  RestaurantePedidosRoute: typeof RestaurantePedidosRoute
+  RestauranteRelatoriosRoute: typeof RestauranteRelatoriosRoute
   RestauranteIndexRoute: typeof RestauranteIndexRoute
 }
 
 const RestauranteRouteChildren: RestauranteRouteChildren = {
+  RestauranteCardapioRoute: RestauranteCardapioRoute,
+  RestauranteClientesRoute: RestauranteClientesRoute,
+  RestauranteConfiguracoesRoute: RestauranteConfiguracoesRoute,
+  RestauranteEstoqueRoute: RestauranteEstoqueRoute,
+  RestaurantePedidosRoute: RestaurantePedidosRoute,
+  RestauranteRelatoriosRoute: RestauranteRelatoriosRoute,
   RestauranteIndexRoute: RestauranteIndexRoute,
 }
 
