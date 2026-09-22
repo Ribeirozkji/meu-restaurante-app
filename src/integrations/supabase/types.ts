@@ -14,7 +14,278 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      addresses: {
+        Row: {
+          cep: string
+          city: string
+          complement: string
+          created_at: string
+          customer_id: string | null
+          distance_km: number
+          district: string
+          id: string
+          is_primary: boolean
+          label: string
+          number: string
+          reference: string
+          state: string
+          street: string
+        }
+        Insert: {
+          cep?: string
+          city?: string
+          complement?: string
+          created_at?: string
+          customer_id?: string | null
+          distance_km?: number
+          district?: string
+          id?: string
+          is_primary?: boolean
+          label?: string
+          number?: string
+          reference?: string
+          state?: string
+          street?: string
+        }
+        Update: {
+          cep?: string
+          city?: string
+          complement?: string
+          created_at?: string
+          customer_id?: string | null
+          distance_km?: number
+          district?: string
+          id?: string
+          is_primary?: boolean
+          label?: string
+          number?: string
+          reference?: string
+          state?: string
+          street?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addresses_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          address: string
+          avatar: string
+          cep: string
+          city: string
+          created_at: string
+          district: string
+          email: string
+          id: string
+          name: string
+          phone: string
+        }
+        Insert: {
+          address?: string
+          avatar?: string
+          cep?: string
+          city?: string
+          created_at?: string
+          district?: string
+          email?: string
+          id: string
+          name: string
+          phone?: string
+        }
+        Update: {
+          address?: string
+          avatar?: string
+          cep?: string
+          city?: string
+          created_at?: string
+          district?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          address: string
+          code: string
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string
+          delivery_fee: number
+          distance_km: number
+          district: string
+          id: string
+          items: Json
+          paid: boolean
+          payment: string
+          status: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          address?: string
+          code: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string
+          delivery_fee?: number
+          distance_km?: number
+          district?: string
+          id?: string
+          items?: Json
+          paid?: boolean
+          payment?: string
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Update: {
+          address?: string
+          code?: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string
+          delivery_fee?: number
+          distance_km?: number
+          district?: string
+          id?: string
+          items?: Json
+          paid?: boolean
+          payment?: string
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          addons: Json
+          available: boolean
+          category: string
+          created_at: string
+          description: string
+          id: string
+          ingredients: string[]
+          name: string
+          price: number
+          promo: boolean
+          rating: number
+          sales: number
+        }
+        Insert: {
+          addons?: Json
+          available?: boolean
+          category: string
+          created_at?: string
+          description?: string
+          id: string
+          ingredients?: string[]
+          name: string
+          price?: number
+          promo?: boolean
+          rating?: number
+          sales?: number
+        }
+        Update: {
+          addons?: Json
+          available?: boolean
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          ingredients?: string[]
+          name?: string
+          price?: number
+          promo?: boolean
+          rating?: number
+          sales?: number
+        }
+        Relationships: []
+      }
+      restaurant_settings: {
+        Row: {
+          address: string
+          delivery_block_km: number
+          delivery_fee_per_block: number
+          id: number
+          name: string
+          open_from: number
+          open_to: number
+          opening_hours: string
+          phone: string
+          pix_key: string
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          delivery_block_km?: number
+          delivery_fee_per_block?: number
+          id?: number
+          name: string
+          open_from?: number
+          open_to?: number
+          opening_hours?: string
+          phone?: string
+          pix_key?: string
+          tagline?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          delivery_block_km?: number
+          delivery_fee_per_block?: number
+          id?: number
+          name?: string
+          open_from?: number
+          open_to?: number
+          opening_hours?: string
+          phone?: string
+          pix_key?: string
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stock_items: {
+        Row: {
+          category: string
+          id: string
+          min_quantity: number
+          name: string
+          quantity: number
+          unit: string
+        }
+        Insert: {
+          category?: string
+          id: string
+          min_quantity?: number
+          name: string
+          quantity?: number
+          unit?: string
+        }
+        Update: {
+          category?: string
+          id?: string
+          min_quantity?: number
+          name?: string
+          quantity?: number
+          unit?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
