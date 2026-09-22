@@ -181,7 +181,7 @@ export async function insertOrder(order: Order) {
     customer_phone: order.customerPhone,
     address: order.address,
     district: order.district,
-    items: order.items,
+    items: order.items as unknown as never,
     subtotal: order.subtotal,
     delivery_fee: order.deliveryFee,
     total: order.total,
@@ -206,7 +206,7 @@ export async function upsertProductDb(product: Product, promo = false) {
     category: product.category,
     rating: product.rating,
     available: product.available,
-    addons: product.addons,
+    addons: product.addons as unknown as never,
     sales: product.sales,
     promo,
   });
