@@ -11,40 +11,49 @@ import type {
   Address,
   Addon,
   CartItem,
+  Customer,
+  DailyClosing,
   Order,
   OrderStatus,
   PaymentMethod,
   Product,
   StockItem,
 } from "@/types";
-import {
-  currentCustomer,
-  mockAddresses,
-  mockCustomers,
-  mockDailyClosings,
-  mockOrders,
-  mockProducts,
-  mockStock,
-} from "@/data/mock";
+import { currentCustomer as fallbackCustomer } from "@/data/mock";
 import { defaultRestaurant, type RestaurantConfig } from "@/config/restaurant";
 import { buildOrderCode } from "@/utils/format";
 import { calculateDeliveryFee } from "@/utils/delivery";
+import {
+  CURRENT_CUSTOMER_ID,
+  deleteAddressDb,
+  deleteProductDb,
+  fetchInitialData,
+  insertOrder,
+  saveAddressDb,
+  setPrimaryAddressDb,
+  updateOrderStatusDb,
+  updateSettingsDb,
+  updateStockDb,
+  upsertProductDb,
+} from "@/lib/api";
 
-const STORAGE_KEY = "sabor-da-casa-state";
+const CART_KEY = "sabor-da-casa-cart";
 
-interface PersistedState {
+interface State {
   cart: CartItem[];
   addresses: Address[];
   orders: Order[];
   products: Product[];
   stock: StockItem[];
+  customers: Customer[];
   restaurant: RestaurantConfig;
+  promoIds: string[];
 }
 
-interface AppStore extends PersistedState {
-  customers: typeof mockCustomers;
-  dailyClosings: typeof mockDailyClosings;
-  customer: typeof currentCustomer;
+interface AppStore extends State {
+  loading: boolean;
+  dailyClosings: DailyClosing[];
+  customer: Customer;
   selectedAddress: Address | undefined;
   cartSubtotal: number;
   cartCount: number;
@@ -74,25 +83,51 @@ interface AppStore extends PersistedState {
 
 const AppContext = createContext<AppStore | null>(null);
 
-const initialState: PersistedState = {
+const initialState: State = {
   cart: [],
-  addresses: mockAddresses,
-  orders: mockOrders,
-  products: mockProducts,
-  stock: mockStock,
+  addresses: [],
+  orders: [],
+  products: [],
+  stock: [],
+  customers: [],
   restaurant: defaultRestaurant,
+  promoIds: [],
 };
 
+function buildClosings(orders: Order[]): DailyClosing[] {
+  const byDay = new Map<string, { orders: number; revenue: number }>();
+  for (const order of orders) {
+    if (order.status === "cancelado") continue;
+    const day = order.createdAt.slice(0, 10);
+    const entry = byDay.get(day) ?? { orders: 0, revenue: 0 };
+    entry.orders += 1;
+    entry.revenue += order.total;
+    byDay.set(day, entry);
+  }
+  return Array.from(byDay.entries())
+    .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+    .map(([day, value]) => ({
+      date: new Date(`${day}T12:00:00`).toISOString(),
+      orders: value.orders,
+      revenue: Math.round(value.revenue * 100) / 100,
+      averageTicket:
+        value.orders > 0
+          ? Math.round((value.revenue / value.orders) * 100) / 100
+          : 0,
+    }));
+}
+
 export function AppStoreProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<PersistedState>(initialState);
+  const [state, setState] = useState<State>(initialState);
+  const [loading, setLoading] = useState(true);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(CART_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as Partial<PersistedState>;
-        setState((prev) => ({ ...prev, ...parsed }));
+        const cart = JSON.parse(raw) as CartItem[];
+        setState((prev) => ({ ...prev, cart }));
       }
     } catch {
       /* ignore */
@@ -102,8 +137,41 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state, hydrated]);
+    localStorage.setItem(CART_KEY, JSON.stringify(state.cart));
+  }, [state.cart, hydrated]);
+
+  useEffect(() => {
+    let active = true;
+    fetchInitialData()
+      .then((data) => {
+        if (!active) return;
+        setState((prev) => ({
+          ...prev,
+          products: data.products,
+          promoIds: data.promoIds,
+          stock: data.stock,
+          customers: data.customers,
+          addresses: data.addresses,
+          orders: data.orders,
+          restaurant: data.restaurant,
+        }));
+      })
+      .catch((error) => console.error("Falha ao carregar dados", error))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const customer = useMemo(
+    () =>
+      state.customers.find((c) => c.id === CURRENT_CUSTOMER_ID) ??
+      state.customers[0] ??
+      fallbackCustomer,
+    [state.customers],
+  );
 
   const selectedAddress = useMemo(
     () => state.addresses.find((a) => a.isPrimary) ?? state.addresses[0],
@@ -128,6 +196,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     state.restaurant.deliveryBlockKm,
     state.restaurant.deliveryFeePerBlock,
   );
+
+  const dailyClosings = useMemo(() => buildClosings(state.orders), [state.orders]);
 
   const addToCart = useCallback<AppStore["addToCart"]>(
     (product, quantity, addons, note) => {
@@ -159,9 +229,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const store: AppStore = {
     ...state,
-    customers: mockCustomers,
-    dailyClosings: mockDailyClosings,
-    customer: currentCustomer,
+    loading,
+    dailyClosings,
+    customer,
     selectedAddress,
     cartSubtotal,
     cartCount,
@@ -182,46 +252,65 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         cart: prev.cart.filter((i) => i.key !== key),
       })),
     clearCart: () => setState((prev) => ({ ...prev, cart: [] })),
-    saveAddress: (address) =>
-      setState((prev) => {
-        if (address.id) {
-          return {
-            ...prev,
-            addresses: prev.addresses.map((a) =>
-              a.id === address.id ? { ...a, ...address } as Address : a,
-            ),
-          };
-        }
-        const id = `ad${Date.now()}`;
-        const created: Address = {
-          ...(address as Omit<Address, "id" | "distanceKm">),
-          id,
-          distanceKm: Math.round((2 + (Date.now() % 60) / 10) * 10) / 10,
-        };
-        const isFirst = prev.addresses.length === 0;
-        return {
+    saveAddress: (address) => {
+      if (address.id) {
+        const existing = state.addresses.find((a) => a.id === address.id);
+        const updated = {
+          ...(existing as Address),
+          ...address,
+          id: address.id,
+        } as Address;
+        setState((prev) => ({
           ...prev,
-          addresses: [
-            ...prev.addresses.map((a) =>
-              created.isPrimary ? { ...a, isPrimary: false } : a,
-            ),
-            { ...created, isPrimary: created.isPrimary || isFirst },
-          ],
-        };
-      }),
-    removeAddress: (id) =>
+          addresses: prev.addresses.map((a) =>
+            a.id === updated.id ? updated : a,
+          ),
+        }));
+        void saveAddressDb(updated);
+        return;
+      }
+      const created: Address = {
+        ...(address as Omit<Address, "id" | "distanceKm">),
+        id: `tmp-${Date.now()}`,
+        distanceKm: Math.round((2 + (Date.now() % 60) / 10) * 10) / 10,
+        isPrimary: address.isPrimary || state.addresses.length === 0,
+      };
+      setState((prev) => ({
+        ...prev,
+        addresses: [
+          ...prev.addresses.map((a) =>
+            created.isPrimary ? { ...a, isPrimary: false } : a,
+          ),
+          created,
+        ],
+      }));
+      void saveAddressDb(created).then((id) => {
+        setState((prev) => ({
+          ...prev,
+          addresses: prev.addresses.map((a) =>
+            a.id === created.id ? { ...a, id } : a,
+          ),
+        }));
+        if (created.isPrimary) void setPrimaryAddressDb(id);
+      });
+    },
+    removeAddress: (id) => {
       setState((prev) => ({
         ...prev,
         addresses: prev.addresses.filter((a) => a.id !== id),
-      })),
-    setPrimaryAddress: (id) =>
+      }));
+      void deleteAddressDb(id);
+    },
+    setPrimaryAddress: (id) => {
       setState((prev) => ({
         ...prev,
         addresses: prev.addresses.map((a) => ({
           ...a,
           isPrimary: a.id === id,
         })),
-      })),
+      }));
+      void setPrimaryAddressDb(id);
+    },
     placeOrder: (payment) => {
       const now = new Date();
       const sequence = 40 + state.orders.length;
@@ -230,9 +319,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       const order: Order = {
         id: `o${Date.now()}`,
         code: buildOrderCode(now, sequence),
-        customerId: currentCustomer.id,
-        customerName: currentCustomer.name,
-        customerPhone: currentCustomer.phone,
+        customerId: customer.id,
+        customerName: customer.name,
+        customerPhone: customer.phone,
         address: selectedAddress
           ? `${selectedAddress.street}, ${selectedAddress.number} — ${selectedAddress.district}`
           : "Endereço não informado",
@@ -255,49 +344,64 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         distanceKm: selectedAddress?.distanceKm ?? 0,
       };
       setState((prev) => ({ ...prev, orders: [order, ...prev.orders], cart: [] }));
+      void insertOrder(order);
       return order;
     },
-    updateOrderStatus: (id, status) =>
+    updateOrderStatus: (id, status) => {
       setState((prev) => ({
         ...prev,
         orders: prev.orders.map((o) => (o.id === id ? { ...o, status } : o)),
-      })),
-    saveProduct: (product) =>
+      }));
+      void updateOrderStatusDb(id, status);
+    },
+    saveProduct: (product) => {
       setState((prev) => ({
         ...prev,
         products: prev.products.some((p) => p.id === product.id)
           ? prev.products.map((p) => (p.id === product.id ? product : p))
           : [...prev.products, product],
-      })),
-    removeProduct: (id) =>
+      }));
+      void upsertProductDb(product, state.promoIds.includes(product.id));
+    },
+    removeProduct: (id) => {
       setState((prev) => ({
         ...prev,
         products: prev.products.filter((p) => p.id !== id),
-      })),
-    toggleProduct: (id) =>
+      }));
+      void deleteProductDb(id);
+    },
+    toggleProduct: (id) => {
+      const target = state.products.find((p) => p.id === id);
+      if (!target) return;
+      const updated = { ...target, available: !target.available };
       setState((prev) => ({
         ...prev,
-        products: prev.products.map((p) =>
-          p.id === id ? { ...p, available: !p.available } : p,
-        ),
-      })),
-    updateStock: (id, quantity) =>
+        products: prev.products.map((p) => (p.id === id ? updated : p)),
+      }));
+      void upsertProductDb(updated, state.promoIds.includes(id));
+    },
+    updateStock: (id, quantity) => {
+      const target = state.stock.find((s) => s.id === id);
+      if (!target) return;
+      const updated = { ...target, quantity: Math.max(0, quantity) };
       setState((prev) => ({
         ...prev,
-        stock: prev.stock.map((s) =>
-          s.id === id ? { ...s, quantity: Math.max(0, quantity) } : s,
-        ),
-      })),
-    saveStockItem: (item) =>
+        stock: prev.stock.map((s) => (s.id === id ? updated : s)),
+      }));
+      void updateStockDb(updated);
+    },
+    saveStockItem: (item) => {
       setState((prev) => ({
         ...prev,
         stock: prev.stock.map((s) => (s.id === item.id ? item : s)),
-      })),
-    updateRestaurant: (config) =>
-      setState((prev) => ({
-        ...prev,
-        restaurant: { ...prev.restaurant, ...config },
-      })),
+      }));
+      void updateStockDb(item);
+    },
+    updateRestaurant: (config) => {
+      const updated = { ...state.restaurant, ...config };
+      setState((prev) => ({ ...prev, restaurant: updated }));
+      void updateSettingsDb(updated);
+    },
   };
 
   return <AppContext.Provider value={store}>{children}</AppContext.Provider>;
