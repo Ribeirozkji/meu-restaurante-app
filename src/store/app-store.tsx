@@ -20,6 +20,7 @@ import type {
   StockItem,
 } from "@/types";
 import { currentCustomer as fallbackCustomer } from "@/data/mock";
+import { supabase } from "@/integrations/supabase/client";
 import { defaultRestaurant, type RestaurantConfig } from "@/config/restaurant";
 import { buildOrderCode } from "@/utils/format";
 import { calculateDeliveryFee } from "@/utils/delivery";
