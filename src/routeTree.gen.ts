@@ -24,6 +24,7 @@ import { Route as RestauranteCardapioRouteImport } from './routes/restaurante.ca
 import { Route as RestauranteClientesRouteImport } from './routes/restaurante.clientes'
 import { Route as RestauranteConfiguracoesRouteImport } from './routes/restaurante.configuracoes'
 import { Route as RestauranteEstoqueRouteImport } from './routes/restaurante.estoque'
+import { Route as RestauranteLoginRouteImport } from './routes/restaurante.login'
 import { Route as RestaurantePedidosRouteImport } from './routes/restaurante.pedidos'
 import { Route as RestauranteRelatoriosRouteImport } from './routes/restaurante.relatorios'
 
@@ -103,6 +104,11 @@ const RestauranteEstoqueRoute = RestauranteEstoqueRouteImport.update({
   path: '/estoque',
   getParentRoute: () => RestauranteRoute,
 } as any)
+const RestauranteLoginRoute = RestauranteLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => RestauranteRoute,
+} as any)
 const RestaurantePedidosRoute = RestaurantePedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/restaurante/clientes': typeof RestauranteClientesRoute
   '/restaurante/configuracoes': typeof RestauranteConfiguracoesRoute
   '/restaurante/estoque': typeof RestauranteEstoqueRoute
+  '/restaurante/login': typeof RestauranteLoginRoute
   '/restaurante/pedidos': typeof RestaurantePedidosRoute
   '/restaurante/relatorios': typeof RestauranteRelatoriosRoute
   '/restaurante/': typeof RestauranteIndexRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/restaurante/clientes': typeof RestauranteClientesRoute
   '/restaurante/configuracoes': typeof RestauranteConfiguracoesRoute
   '/restaurante/estoque': typeof RestauranteEstoqueRoute
+  '/restaurante/login': typeof RestauranteLoginRoute
   '/restaurante/pedidos': typeof RestaurantePedidosRoute
   '/restaurante/relatorios': typeof RestauranteRelatoriosRoute
   '/restaurante': typeof RestauranteIndexRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/restaurante/clientes': typeof RestauranteClientesRoute
   '/restaurante/configuracoes': typeof RestauranteConfiguracoesRoute
   '/restaurante/estoque': typeof RestauranteEstoqueRoute
+  '/restaurante/login': typeof RestauranteLoginRoute
   '/restaurante/pedidos': typeof RestaurantePedidosRoute
   '/restaurante/relatorios': typeof RestauranteRelatoriosRoute
   '/restaurante/': typeof RestauranteIndexRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/restaurante/clientes'
     | '/restaurante/configuracoes'
     | '/restaurante/estoque'
+    | '/restaurante/login'
     | '/restaurante/pedidos'
     | '/restaurante/relatorios'
     | '/restaurante/'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/restaurante/clientes'
     | '/restaurante/configuracoes'
     | '/restaurante/estoque'
+    | '/restaurante/login'
     | '/restaurante/pedidos'
     | '/restaurante/relatorios'
     | '/restaurante'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/restaurante/clientes'
     | '/restaurante/configuracoes'
     | '/restaurante/estoque'
+    | '/restaurante/login'
     | '/restaurante/pedidos'
     | '/restaurante/relatorios'
     | '/restaurante/'
@@ -350,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestauranteEstoqueRouteImport
       parentRoute: typeof RestauranteRoute
     }
+    '/restaurante/login': {
+      id: '/restaurante/login'
+      path: '/login'
+      fullPath: '/restaurante/login'
+      preLoaderRoute: typeof RestauranteLoginRouteImport
+      parentRoute: typeof RestauranteRoute
+    }
     '/restaurante/pedidos': {
       id: '/restaurante/pedidos'
       path: '/pedidos'
@@ -372,6 +391,7 @@ interface RestauranteRouteChildren {
   RestauranteClientesRoute: typeof RestauranteClientesRoute
   RestauranteConfiguracoesRoute: typeof RestauranteConfiguracoesRoute
   RestauranteEstoqueRoute: typeof RestauranteEstoqueRoute
+  RestauranteLoginRoute: typeof RestauranteLoginRoute
   RestaurantePedidosRoute: typeof RestaurantePedidosRoute
   RestauranteRelatoriosRoute: typeof RestauranteRelatoriosRoute
   RestauranteIndexRoute: typeof RestauranteIndexRoute
@@ -382,6 +402,7 @@ const RestauranteRouteChildren: RestauranteRouteChildren = {
   RestauranteClientesRoute: RestauranteClientesRoute,
   RestauranteConfiguracoesRoute: RestauranteConfiguracoesRoute,
   RestauranteEstoqueRoute: RestauranteEstoqueRoute,
+  RestauranteLoginRoute: RestauranteLoginRoute,
   RestaurantePedidosRoute: RestaurantePedidosRoute,
   RestauranteRelatoriosRoute: RestauranteRelatoriosRoute,
   RestauranteIndexRoute: RestauranteIndexRoute,
