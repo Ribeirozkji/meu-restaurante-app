@@ -20,6 +20,7 @@ import type {
   StockItem,
 } from "@/types";
 import { currentCustomer as fallbackCustomer } from "@/data/mock";
+import { supabase } from "@/integrations/supabase/client";
 import { defaultRestaurant, type RestaurantConfig } from "@/config/restaurant";
 import { buildOrderCode } from "@/utils/format";
 import { calculateDeliveryFee } from "@/utils/delivery";
@@ -140,6 +141,16 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(CART_KEY, JSON.stringify(state.cart));
   }, [state.cart, hydrated]);
 
+  const [authVersion, setAuthVersion] = useState(0);
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        setAuthVersion((v) => v + 1);
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   useEffect(() => {
     let active = true;
     fetchInitialData()
@@ -163,7 +174,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [authVersion]);
 
   const customer = useMemo(
     () =>

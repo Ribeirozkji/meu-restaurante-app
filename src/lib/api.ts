@@ -186,8 +186,9 @@ export async function insertOrder(order: Order) {
     delivery_fee: order.deliveryFee,
     total: order.total,
     payment: order.payment,
-    paid: order.paid,
-    status: order.status,
+    // O banco só aceita pedido novo como não pago/novo; o admin confirma depois.
+    paid: false,
+    status: "novo",
     distance_km: order.distanceKm,
   });
 }

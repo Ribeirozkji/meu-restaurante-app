@@ -1,8 +1,9 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
   Boxes,
   LayoutDashboard,
+  LogOut,
   Menu,
   Settings,
   ShoppingBag,
@@ -14,6 +15,7 @@ import {
 import { useState, type ReactNode } from "react";
 import { useApp } from "@/store/app-store";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const links = [
   { to: "/restaurante", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -38,6 +40,11 @@ export function RestaurantLayout({
 }) {
   const { restaurant } = useApp();
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  async function signOut() {
+    await supabase.auth.signOut();
+    navigate({ to: "/restaurante/login" });
+  }
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const nav = (
@@ -70,6 +77,13 @@ export function RestaurantLayout({
         <Store className="h-4.5 w-4.5" />
         Ver loja do cliente
       </Link>
+      <button
+        onClick={signOut}
+        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      >
+        <LogOut className="h-4.5 w-4.5" />
+        Sair
+      </button>
     </nav>
   );
 
