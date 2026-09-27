@@ -25,8 +25,9 @@ import { defaultRestaurant, type RestaurantConfig } from "@/config/restaurant";
 import { buildOrderCode } from "@/utils/format";
 import { calculateDeliveryFee } from "@/utils/delivery";
 import {
-  CURRENT_CUSTOMER_ID,
   deleteAddressDb,
+  ensureMyCustomer,
+  fetchMyAddresses,
   deleteProductDb,
   fetchInitialData,
   insertOrder,
@@ -56,6 +57,7 @@ interface AppStore extends State {
   loading: boolean;
   dailyClosings: DailyClosing[];
   customer: Customer;
+  myCustomer: Customer | null;
   selectedAddress: Address | undefined;
   cartSubtotal: number;
   cartCount: number;
@@ -143,6 +145,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   }, [state.cart, hydrated]);
 
   const [authVersion, setAuthVersion] = useState(0);
+  const [myCustomer, setMyCustomer] = useState<Customer | null>(null);
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
@@ -164,7 +167,6 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           promoIds: data.promoIds,
           stock: data.stock,
           customers: data.customers,
-          addresses: data.addresses,
           orders: data.orders,
           restaurant: data.restaurant,
         }));
@@ -173,17 +175,22 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       .finally(() => {
         if (active) setLoading(false);
       });
+    ensureMyCustomer()
+      .then(async (me) => {
+        if (!active) return;
+        setMyCustomer(me);
+        const addresses = me ? await fetchMyAddresses(me.id) : [];
+        if (active) setState((prev) => ({ ...prev, addresses }));
+      })
+      .catch((error) => console.error("Falha ao carregar cliente", error));
     return () => {
       active = false;
     };
   }, [authVersion]);
 
   const customer = useMemo(
-    () =>
-      state.customers.find((c) => c.id === CURRENT_CUSTOMER_ID) ??
-      state.customers[0] ??
-      fallbackCustomer,
-    [state.customers],
+    () => myCustomer ?? fallbackCustomer,
+    [myCustomer],
   );
 
   const selectedAddress = useMemo(
@@ -245,6 +252,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     loading,
     dailyClosings,
     customer,
+    myCustomer,
     selectedAddress,
     cartSubtotal,
     cartCount,
@@ -266,6 +274,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       })),
     clearCart: () => setState((prev) => ({ ...prev, cart: [] })),
     saveAddress: (address) => {
+      if (!myCustomer) return;
+      const cid = myCustomer.id;
       if (address.id) {
         const existing = state.addresses.find((a) => a.id === address.id);
         const updated = {
@@ -279,7 +289,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             a.id === updated.id ? updated : a,
           ),
         }));
-        void saveAddressDb(updated);
+        void saveAddressDb(updated, cid);
         return;
       }
       const created: Address = {
@@ -297,14 +307,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           created,
         ],
       }));
-      void saveAddressDb(created).then((id) => {
+      void saveAddressDb(created, cid).then((id) => {
         setState((prev) => ({
           ...prev,
           addresses: prev.addresses.map((a) =>
             a.id === created.id ? { ...a, id } : a,
           ),
         }));
-        if (created.isPrimary) void setPrimaryAddressDb(id);
+        if (created.isPrimary) void setPrimaryAddressDb(id, cid);
       });
     },
     removeAddress: (id) => {
@@ -322,7 +332,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           isPrimary: a.id === id,
         })),
       }));
-      void setPrimaryAddressDb(id);
+      if (myCustomer) void setPrimaryAddressDb(id, myCustomer.id);
     },
     placeOrder: (payment) => {
       const now = new Date();

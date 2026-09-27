@@ -141,6 +141,41 @@ export const CURRENT_CUSTOMER_ID = "c5";
  * Dados do painel (pedidos, estoque, clientes, endereços) só são lidos
  * quando o usuário logado é admin — as regras do banco bloqueiam o resto.
  */
+/** Cadastro do cliente ligado ao usuário logado (cria se ainda não existir). */
+export async function ensureMyCustomer(): Promise<Customer | null> {
+  const { data: auth } = await supabase.auth.getUser();
+  const user = auth.user;
+  if (!user) return null;
+  const { data } = await supabase
+    .from("customers")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (data) return mapCustomer(data as Row);
+  const meta = (user.user_metadata ?? {}) as Record<string, string>;
+  const { data: created } = await supabase
+    .from("customers")
+    .insert({
+      id: `u-${user.id}`,
+      user_id: user.id,
+      name: meta["name"] || user.email?.split("@")[0] || "Cliente",
+      phone: meta["phone"] ?? "",
+      email: user.email ?? "",
+    })
+    .select("*")
+    .maybeSingle();
+  return created ? mapCustomer(created as Row) : null;
+}
+
+export async function fetchMyAddresses(customerId: string) {
+  const { data } = await supabase
+    .from("addresses")
+    .select("*")
+    .eq("customer_id", customerId)
+    .order("created_at");
+  return (data ?? []).map(mapAddress);
+}
+
 export async function fetchInitialData(isAdmin: boolean) {
   const publicReads = Promise.all([
     supabase.from("products").select("*").order("id"),
@@ -151,11 +186,6 @@ export async function fetchInitialData(isAdmin: boolean) {
     ? Promise.all([
         supabase.from("stock_items").select("*").order("name"),
         supabase.from("customers").select("*").order("name"),
-        supabase
-          .from("addresses")
-          .select("*")
-          .eq("customer_id", CURRENT_CUSTOMER_ID)
-          .order("created_at"),
         supabase
           .from("orders")
           .select("*")
@@ -176,8 +206,7 @@ export async function fetchInitialData(isAdmin: boolean) {
     promoIds: mappedProducts.filter((p) => p.promo).map((p) => p.id),
     stock: (admin?.[0]?.data ?? []).map(mapStock),
     customers: (admin?.[1]?.data ?? []).map(mapCustomer),
-    addresses: (admin?.[2]?.data ?? []).map(mapAddress),
-    orders: (admin?.[3]?.data ?? []).map(mapOrder),
+    orders: (admin?.[2]?.data ?? []).map(mapOrder),
     restaurant: mapSettings((settings.data as Row | null) ?? null),
   };
 }
@@ -241,9 +270,9 @@ export async function updateStockDb(item: StockItem) {
     .eq("id", item.id);
 }
 
-export async function saveAddressDb(address: Address) {
+export async function saveAddressDb(address: Address, customerId: string) {
   const payload = {
-    customer_id: CURRENT_CUSTOMER_ID,
+    customer_id: customerId,
     label: address.label,
     cep: address.cep,
     street: address.street,
@@ -273,11 +302,11 @@ export async function deleteAddressDb(id: string) {
   await supabase.from("addresses").delete().eq("id", id);
 }
 
-export async function setPrimaryAddressDb(id: string) {
+export async function setPrimaryAddressDb(id: string, customerId: string) {
   await supabase
     .from("addresses")
     .update({ is_primary: false })
-    .eq("customer_id", CURRENT_CUSTOMER_ID);
+    .eq("customer_id", customerId);
   await supabase.from("addresses").update({ is_primary: true }).eq("id", id);
 }
 
