@@ -85,6 +85,7 @@ export type Database = {
           id: string
           name: string
           phone: string
+          user_id: string | null
         }
         Insert: {
           address?: string
@@ -97,6 +98,7 @@ export type Database = {
           id: string
           name: string
           phone?: string
+          user_id?: string | null
         }
         Update: {
           address?: string
@@ -109,6 +111,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -324,6 +327,7 @@ export type Database = {
             }
             Returns: boolean
           }
+      owns_customer: { Args: { _customer_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin"
