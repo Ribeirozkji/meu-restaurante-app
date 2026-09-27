@@ -137,23 +137,34 @@ export function mapSettings(row: Row | null): RestaurantConfig {
 
 export const CURRENT_CUSTOMER_ID = "c5";
 
-export async function fetchInitialData() {
-  const [products, stock, customers, addresses, orders, settings] =
-    await Promise.all([
-      supabase.from("products").select("*").order("id"),
-      supabase.from("stock_items").select("*").order("name"),
-      supabase.from("customers").select("*").order("name"),
-      supabase
-        .from("addresses")
-        .select("*")
-        .eq("customer_id", CURRENT_CUSTOMER_ID)
-        .order("created_at"),
-      supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase.from("restaurant_settings").select("*").eq("id", 1).maybeSingle(),
-    ]);
+/**
+ * Dados do painel (pedidos, estoque, clientes, endereços) só são lidos
+ * quando o usuário logado é admin — as regras do banco bloqueiam o resto.
+ */
+export async function fetchInitialData(isAdmin: boolean) {
+  const publicReads = Promise.all([
+    supabase.from("products").select("*").order("id"),
+    supabase.from("restaurant_settings").select("*").eq("id", 1).maybeSingle(),
+  ]);
+
+  const adminReads = isAdmin
+    ? Promise.all([
+        supabase.from("stock_items").select("*").order("name"),
+        supabase.from("customers").select("*").order("name"),
+        supabase
+          .from("addresses")
+          .select("*")
+          .eq("customer_id", CURRENT_CUSTOMER_ID)
+          .order("created_at"),
+        supabase
+          .from("orders")
+          .select("*")
+          .order("created_at", { ascending: false }),
+      ])
+    : null;
+
+  const [products, settings] = await publicReads;
+  const admin = adminReads ? await adminReads : null;
 
   const mappedProducts = (products.data ?? []).map(mapProduct);
   mappedProducts.sort(
@@ -163,10 +174,10 @@ export async function fetchInitialData() {
   return {
     products: mappedProducts,
     promoIds: mappedProducts.filter((p) => p.promo).map((p) => p.id),
-    stock: (stock.data ?? []).map(mapStock),
-    customers: (customers.data ?? []).map(mapCustomer),
-    addresses: (addresses.data ?? []).map(mapAddress),
-    orders: (orders.data ?? []).map(mapOrder),
+    stock: (admin?.[0]?.data ?? []).map(mapStock),
+    customers: (admin?.[1]?.data ?? []).map(mapCustomer),
+    addresses: (admin?.[2]?.data ?? []).map(mapAddress),
+    orders: (admin?.[3]?.data ?? []).map(mapOrder),
     restaurant: mapSettings((settings.data as Row | null) ?? null),
   };
 }

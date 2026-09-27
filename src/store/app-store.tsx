@@ -37,6 +37,7 @@ import {
   updateStockDb,
   upsertProductDb,
 } from "@/lib/api";
+import { currentUserIsAdmin } from "@/lib/admin-auth";
 
 const CART_KEY = "sabor-da-casa-cart";
 
@@ -153,7 +154,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    fetchInitialData()
+    currentUserIsAdmin()
+      .then((isAdmin) => fetchInitialData(isAdmin))
       .then((data) => {
         if (!active) return;
         setState((prev) => ({
