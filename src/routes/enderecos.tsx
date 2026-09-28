@@ -60,16 +60,13 @@ function Enderecos() {
       </ClientLayout>
     );
   }
-  return <EnderecosInner {...{ addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant, form, setForm }} />;
+  return <EnderecosInner />;
 }
 
-function EnderecosInner({
-  addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant, form, setForm,
-}: ReturnType<typeof useApp> & {
-  form: FormState | null;
-  setForm: (f: FormState | null) => void;
-}) {
+function EnderecosInner() {
+  const { addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant } = useApp();
   const [form, setForm] = useState<FormState | null>(null);
+
 
   function submit() {
     if (!form) return;
