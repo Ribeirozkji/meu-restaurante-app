@@ -40,8 +40,35 @@ const emptyForm: FormState = {
 };
 
 function Enderecos() {
-  const { addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant } =
+  const { addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant, myCustomer } =
     useApp();
+  const [form, setForm] = useState<FormState | null>(null);
+
+  if (!myCustomer) {
+    return (
+      <ClientLayout>
+        <div className="card-surface mx-auto max-w-md space-y-3 p-6 text-center">
+          <MapPin className="mx-auto h-8 w-8 text-primary" />
+          <h1 className="text-lg font-extrabold text-foreground">Entre para salvar seus endereços</h1>
+          <p className="text-sm text-muted-foreground">
+            Seus endereços ficam guardados na sua conta e só você pode vê-los.
+          </p>
+          <Link to="/entrar" className="inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground">
+            Entrar ou criar conta
+          </Link>
+        </div>
+      </ClientLayout>
+    );
+  }
+  return <EnderecosInner {...{ addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant, form, setForm }} />;
+}
+
+function EnderecosInner({
+  addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant, form, setForm,
+}: ReturnType<typeof useApp> & {
+  form: FormState | null;
+  setForm: (f: FormState | null) => void;
+}) {
   const [form, setForm] = useState<FormState | null>(null);
 
   function submit() {
