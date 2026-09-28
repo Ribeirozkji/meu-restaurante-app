@@ -14,6 +14,7 @@ import { Route as CardapioRouteImport } from './routes/cardapio'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as EnderecosRouteImport } from './routes/enderecos'
+import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as RestauranteRouteImport } from './routes/restaurante'
@@ -51,6 +52,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const EnderecosRoute = EnderecosRouteImport.update({
   id: '/enderecos',
   path: '/enderecos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HistoricoRoute = HistoricoRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/enderecos': typeof EnderecosRoute
+  '/entrar': typeof EntrarRoute
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
   '/restaurante': typeof RestauranteRouteWithChildren
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/enderecos': typeof EnderecosRoute
+  '/entrar': typeof EntrarRoute
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
   '/pedido/$id': typeof PedidoIdRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/enderecos': typeof EnderecosRoute
+  '/entrar': typeof EntrarRoute
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
   '/restaurante': typeof RestauranteRouteWithChildren
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/enderecos'
+    | '/entrar'
     | '/historico'
     | '/perfil'
     | '/restaurante'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/enderecos'
+    | '/entrar'
     | '/historico'
     | '/perfil'
     | '/pedido/$id'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/enderecos'
+    | '/entrar'
     | '/historico'
     | '/perfil'
     | '/restaurante'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   CheckoutRoute: typeof CheckoutRoute
   EnderecosRoute: typeof EnderecosRoute
+  EntrarRoute: typeof EntrarRoute
   HistoricoRoute: typeof HistoricoRoute
   PerfilRoute: typeof PerfilRoute
   RestauranteRoute: typeof RestauranteRouteWithChildren
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       path: '/enderecos'
       fullPath: '/enderecos'
       preLoaderRoute: typeof EnderecosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/historico': {
@@ -418,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   CheckoutRoute: CheckoutRoute,
   EnderecosRoute: EnderecosRoute,
+  EntrarRoute: EntrarRoute,
   HistoricoRoute: HistoricoRoute,
   PerfilRoute: PerfilRoute,
   RestauranteRoute: RestauranteRouteWithChildren,
