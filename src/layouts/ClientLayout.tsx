@@ -1,7 +1,9 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Clock,
   Home,
+  LogIn,
+  LogOut,
   MapPin,
   Receipt,
   ShoppingBag,
@@ -12,6 +14,7 @@ import type { ReactNode } from "react";
 import { useApp } from "@/store/app-store";
 import { isOpenNow } from "@/config/restaurant";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { to: "/cardapio", label: "Cardápio", icon: UtensilsCrossed },
@@ -27,7 +30,8 @@ export function ClientLayout({
   children: ReactNode;
   showSearch?: ReactNode;
 }) {
-  const { restaurant, cartCount } = useApp();
+  const { restaurant, cartCount, myCustomer } = useApp();
+  const navigate = useNavigate();
   const open = isOpenNow(restaurant);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -70,13 +74,35 @@ export function ClientLayout({
           </Link>
 
           <div className="ml-auto flex items-center gap-1.5">
-            <Link
-              to="/perfil"
-              className="hidden h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
-              aria-label="Perfil"
-            >
-              <User className="h-5 w-5" />
-            </Link>
+            {myCustomer ? (
+              <>
+                <Link
+                  to="/perfil"
+                  className="hidden h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
+                  aria-label="Perfil"
+                >
+                  <User className="h-5 w-5" />
+                </Link>
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    navigate({ to: "/", replace: true });
+                  }}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Sair"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sair</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/entrar"
+                className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-border px-3 text-sm font-semibold text-foreground hover:bg-muted"
+              >
+                <LogIn className="h-4 w-4" /> Entrar
+              </Link>
+            )}
             <Link
               to="/carrinho"
               className="relative inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground shadow-float transition-opacity hover:opacity-90"
