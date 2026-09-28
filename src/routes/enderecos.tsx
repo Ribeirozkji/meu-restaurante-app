@@ -40,9 +40,7 @@ const emptyForm: FormState = {
 };
 
 function Enderecos() {
-  const { addresses, saveAddress, removeAddress, setPrimaryAddress, restaurant, myCustomer } =
-    useApp();
-  const [form, setForm] = useState<FormState | null>(null);
+  const { myCustomer } = useApp();
 
   if (!myCustomer) {
     return (
