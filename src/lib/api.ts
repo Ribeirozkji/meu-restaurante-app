@@ -186,15 +186,17 @@ export async function fetchInitialData(isAdmin: boolean) {
     ? Promise.all([
         supabase.from("stock_items").select("*").order("name"),
         supabase.from("customers").select("*").order("name"),
-        supabase
-          .from("orders")
-          .select("*")
-          .order("created_at", { ascending: false }),
       ])
     : null;
+  // Admin recebe todos os pedidos; cliente logado só os próprios (regra do banco).
+  const ordersRead = supabase
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   const [products, settings] = await publicReads;
   const admin = adminReads ? await adminReads : null;
+  const ordersRes = await ordersRead;
 
   const mappedProducts = (products.data ?? []).map(mapProduct);
   mappedProducts.sort(
@@ -206,16 +208,20 @@ export async function fetchInitialData(isAdmin: boolean) {
     promoIds: mappedProducts.filter((p) => p.promo).map((p) => p.id),
     stock: (admin?.[0]?.data ?? []).map(mapStock),
     customers: (admin?.[1]?.data ?? []).map(mapCustomer),
-    orders: (admin?.[2]?.data ?? []).map(mapOrder),
+    orders: (ordersRes.data ?? []).map(mapOrder),
     restaurant: mapSettings((settings.data as Row | null) ?? null),
   };
 }
 
 /* ---------- escrita ---------- */
 
-export async function insertOrder(order: Order) {
-  await supabase.from("orders").insert({
-    code: order.code,
+function check(res: { error: unknown }) {
+  if (res.error) throw res.error;
+}
+
+export async function insertOrder(order: Order): Promise<Order> {
+  const { data, error } = await supabase.from("orders").insert({
+    code: "auto", // gerado pelo banco
     customer_id: order.customerId,
     customer_name: order.customerName,
     customer_phone: order.customerPhone,
@@ -230,15 +236,17 @@ export async function insertOrder(order: Order) {
     paid: false,
     status: "novo",
     distance_km: order.distanceKm,
-  });
+  }).select("*").single();
+  if (error || !data) throw error ?? new Error("Pedido não gravado");
+  return mapOrder(data as Row);
 }
 
 export async function updateOrderStatusDb(id: string, status: Order["status"]) {
-  await supabase.from("orders").update({ status }).eq("id", id);
+  check(await supabase.from("orders").update({ status }).eq("id", id));
 }
 
 export async function upsertProductDb(product: Product, promo = false) {
-  await supabase.from("products").upsert({
+  check(await supabase.from("products").upsert({
     id: product.id,
     name: product.name,
     description: product.description,
@@ -250,15 +258,15 @@ export async function upsertProductDb(product: Product, promo = false) {
     addons: product.addons as unknown as never,
     sales: product.sales,
     promo,
-  });
+  }));
 }
 
 export async function deleteProductDb(id: string) {
-  await supabase.from("products").delete().eq("id", id);
+  check(await supabase.from("products").delete().eq("id", id));
 }
 
 export async function updateStockDb(item: StockItem) {
-  await supabase
+  check(await supabase
     .from("stock_items")
     .update({
       name: item.name,
@@ -267,7 +275,7 @@ export async function updateStockDb(item: StockItem) {
       min_quantity: item.minQuantity,
       unit: item.unit,
     })
-    .eq("id", item.id);
+    .eq("id", item.id));
 }
 
 export async function saveAddressDb(address: Address, customerId: string) {
@@ -287,31 +295,32 @@ export async function saveAddressDb(address: Address, customerId: string) {
   };
   const isUuid = /^[0-9a-f-]{36}$/i.test(address.id);
   if (isUuid) {
-    await supabase.from("addresses").update(payload).eq("id", address.id);
+    check(await supabase.from("addresses").update(payload).eq("id", address.id));
     return address.id;
   }
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("addresses")
     .insert(payload)
     .select("id")
-    .maybeSingle();
-  return data ? String((data as Row)["id"]) : address.id;
+    .single();
+  if (error || !data) throw error ?? new Error("Endereço não gravado");
+  return String((data as Row)["id"]);
 }
 
 export async function deleteAddressDb(id: string) {
-  await supabase.from("addresses").delete().eq("id", id);
+  check(await supabase.from("addresses").delete().eq("id", id));
 }
 
 export async function setPrimaryAddressDb(id: string, customerId: string) {
-  await supabase
+  check(await supabase
     .from("addresses")
     .update({ is_primary: false })
-    .eq("customer_id", customerId);
-  await supabase.from("addresses").update({ is_primary: true }).eq("id", id);
+    .eq("customer_id", customerId));
+  check(await supabase.from("addresses").update({ is_primary: true }).eq("id", id));
 }
 
 export async function updateSettingsDb(config: RestaurantConfig) {
-  await supabase
+  check(await supabase
     .from("restaurant_settings")
     .update({
       name: config.name,
@@ -325,5 +334,5 @@ export async function updateSettingsDb(config: RestaurantConfig) {
       delivery_fee_per_block: config.deliveryFeePerBlock,
       delivery_block_km: config.deliveryBlockKm,
     })
-    .eq("id", 1);
+    .eq("id", 1));
 }
