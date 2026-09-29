@@ -22,7 +22,7 @@ import type {
 import { currentCustomer as fallbackCustomer } from "@/data/mock";
 import { supabase } from "@/integrations/supabase/client";
 import { defaultRestaurant, type RestaurantConfig } from "@/config/restaurant";
-import { buildOrderCode } from "@/utils/format";
+import { toast } from "sonner";
 import { calculateDeliveryFee } from "@/utils/delivery";
 import {
   deleteAddressDb,
@@ -41,6 +41,15 @@ import {
 import { currentUserIsAdmin } from "@/lib/admin-auth";
 
 const CART_KEY = "sabor-da-casa-cart";
+
+/** Mostra um aviso se a gravação no banco falhar. */
+function guard<T>(p: Promise<T>, what = "salvar") {
+  return p.catch((error) => {
+    console.error(error);
+    toast.error(`Não foi possível ${what}. Tente novamente.`);
+    throw error;
+  });
+}
 
 interface State {
   cart: CartItem[];
@@ -75,7 +84,7 @@ interface AppStore extends State {
   saveAddress: (address: Omit<Address, "id" | "distanceKm"> & { id?: string }) => void;
   removeAddress: (id: string) => void;
   setPrimaryAddress: (id: string) => void;
-  placeOrder: (payment: PaymentMethod) => Order;
+  placeOrder: (payment: PaymentMethod) => Promise<Order | null>;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   saveProduct: (product: Product) => void;
   removeProduct: (id: string) => void;
@@ -289,7 +298,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             a.id === updated.id ? updated : a,
           ),
         }));
-        void saveAddressDb(updated, cid);
+        guard(saveAddressDb(updated, cid), "salvar o endereço").catch(() => {});
         return;
       }
       const created: Address = {
@@ -307,14 +316,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           created,
         ],
       }));
-      void saveAddressDb(created, cid).then((id) => {
+      guard(saveAddressDb(created, cid), "salvar o endereço").then((id) => {
         setState((prev) => ({
           ...prev,
           addresses: prev.addresses.map((a) =>
             a.id === created.id ? { ...a, id } : a,
           ),
         }));
-        if (created.isPrimary) void setPrimaryAddressDb(id, cid);
+        if (created.isPrimary) guard(setPrimaryAddressDb(id, cid)).catch(() => {});
       });
     },
     removeAddress: (id) => {
@@ -322,7 +331,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         ...prev,
         addresses: prev.addresses.filter((a) => a.id !== id),
       }));
-      void deleteAddressDb(id);
+      guard(deleteAddressDb(id)).catch(() => {});
     },
     setPrimaryAddress: (id) => {
       setState((prev) => ({
@@ -332,16 +341,19 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           isPrimary: a.id === id,
         })),
       }));
-      if (myCustomer) void setPrimaryAddressDb(id, myCustomer.id);
+      if (myCustomer) guard(setPrimaryAddressDb(id, myCustomer.id)).catch(() => {});
     },
-    placeOrder: (payment) => {
+    placeOrder: async (payment) => {
+      if (!myCustomer) {
+        toast.error("Entre na sua conta para fazer o pedido.");
+        return null;
+      }
       const now = new Date();
-      const sequence = 40 + state.orders.length;
       const subtotal = cartSubtotal;
       const fee = deliveryFee;
       const order: Order = {
         id: `o${Date.now()}`,
-        code: buildOrderCode(now, sequence),
+        code: "",
         customerId: customer.id,
         customerName: customer.name,
         customerPhone: customer.phone,
@@ -361,21 +373,27 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         deliveryFee: fee,
         total: subtotal + fee,
         payment,
-        paid: payment === "pix",
+        paid: false,
         status: "novo",
         createdAt: now.toISOString(),
         distanceKm: selectedAddress?.distanceKm ?? 0,
       };
-      setState((prev) => ({ ...prev, orders: [order, ...prev.orders], cart: [] }));
-      void insertOrder(order);
-      return order;
+      try {
+        const saved = await insertOrder(order);
+        setState((prev) => ({ ...prev, orders: [saved, ...prev.orders], cart: [] }));
+        return saved;
+      } catch (error) {
+        console.error(error);
+        toast.error("Não foi possível enviar o pedido. Tente novamente.");
+        return null;
+      }
     },
     updateOrderStatus: (id, status) => {
       setState((prev) => ({
         ...prev,
         orders: prev.orders.map((o) => (o.id === id ? { ...o, status } : o)),
       }));
-      void updateOrderStatusDb(id, status);
+      guard(updateOrderStatusDb(id, status)).catch(() => {});
     },
     saveProduct: (product) => {
       setState((prev) => ({
@@ -384,14 +402,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           ? prev.products.map((p) => (p.id === product.id ? product : p))
           : [...prev.products, product],
       }));
-      void upsertProductDb(product, state.promoIds.includes(product.id));
+      guard(upsertProductDb(product, state.promoIds.includes(product.id))).catch(() => {});
     },
     removeProduct: (id) => {
       setState((prev) => ({
         ...prev,
         products: prev.products.filter((p) => p.id !== id),
       }));
-      void deleteProductDb(id);
+      guard(deleteProductDb(id)).catch(() => {});
     },
     toggleProduct: (id) => {
       const target = state.products.find((p) => p.id === id);
@@ -401,7 +419,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         ...prev,
         products: prev.products.map((p) => (p.id === id ? updated : p)),
       }));
-      void upsertProductDb(updated, state.promoIds.includes(id));
+      guard(upsertProductDb(updated, state.promoIds.includes(id))).catch(() => {});
     },
     updateStock: (id, quantity) => {
       const target = state.stock.find((s) => s.id === id);
@@ -411,19 +429,19 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         ...prev,
         stock: prev.stock.map((s) => (s.id === id ? updated : s)),
       }));
-      void updateStockDb(updated);
+      guard(updateStockDb(updated)).catch(() => {});
     },
     saveStockItem: (item) => {
       setState((prev) => ({
         ...prev,
         stock: prev.stock.map((s) => (s.id === item.id ? item : s)),
       }));
-      void updateStockDb(item);
+      guard(updateStockDb(item)).catch(() => {});
     },
     updateRestaurant: (config) => {
       const updated = { ...state.restaurant, ...config };
       setState((prev) => ({ ...prev, restaurant: updated }));
-      void updateSettingsDb(updated);
+      guard(updateSettingsDb(updated)).catch(() => {});
     },
   };
 

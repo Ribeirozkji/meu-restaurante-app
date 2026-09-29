@@ -37,7 +37,9 @@ function Checkout() {
     selectedAddress,
     restaurant,
     placeOrder,
+    myCustomer,
   } = useApp();
+  const [sending, setSending] = useState(false);
   const navigate = useNavigate();
   const [payment, setPayment] = useState<PaymentMethod>("pix");
   const [showPix, setShowPix] = useState(false);
@@ -58,8 +60,27 @@ function Checkout() {
     );
   }
 
-  function confirm() {
-    const order = placeOrder(payment);
+  if (!myCustomer) {
+    return (
+      <ClientLayout>
+        <div className="card-surface p-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            Entre na sua conta para finalizar o pedido.
+          </p>
+          <Link to="/entrar" className="mt-3 inline-block font-semibold text-primary">
+            Entrar ou criar conta
+          </Link>
+        </div>
+      </ClientLayout>
+    );
+  }
+
+  async function confirm() {
+    if (sending) return;
+    setSending(true);
+    const order = await placeOrder(payment);
+    setSending(false);
+    if (!order) return;
     toast.success("Pedido enviado para o restaurante!");
     navigate({ to: "/pedido/$id", params: { id: order.id } });
   }
@@ -230,7 +251,7 @@ function Checkout() {
 function FakeQrCode() {
   const cells = Array.from({ length: 21 * 21 }, (_, i) => (i * 7919) % 11 < 5);
   return (
-    <div className="mx-auto grid w-44 grid-cols-21 gap-0 rounded-xl bg-card p-3 shadow-card">
+    <div className="mx-auto w-44 rounded-xl bg-card p-3 shadow-card">
       <div className="grid w-full grid-cols-[repeat(21,1fr)]">
         {cells.map((filled, i) => (
           <span
