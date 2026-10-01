@@ -119,6 +119,9 @@ function PedidoDetalhe() {
               <li key={i} className="flex justify-between gap-3">
                 <span className="text-muted-foreground">
                   {item.quantity} × {item.name}
+                  {item.addonNames && item.addonNames.length > 0 && (
+                    <span className="block text-xs text-muted-foreground">+ {item.addonNames.join(", ")}</span>
+                  )}
                 </span>
                 <span className="font-semibold">{currency(item.price * item.quantity)}</span>
               </li>

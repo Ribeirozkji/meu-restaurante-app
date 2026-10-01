@@ -86,6 +86,8 @@ export interface OrderItem {
   quantity: number;
   price: number;
   addons?: string[];
+  /** Nomes dos adicionais, só para exibição (o banco confere pelos ids em `addons`). */
+  addonNames?: string[];
   note?: string;
 }
 
