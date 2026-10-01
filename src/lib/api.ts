@@ -245,6 +245,10 @@ export async function updateOrderStatusDb(id: string, status: Order["status"]) {
   check(await supabase.from("orders").update({ status }).eq("id", id));
 }
 
+export async function updateOrderPaymentDb(id: string, paid: boolean) {
+  check(await supabase.from("orders").update({ paid }).eq("id", id));
+}
+
 export async function upsertProductDb(product: Product, promo = false) {
   check(await supabase.from("products").upsert({
     id: product.id,
