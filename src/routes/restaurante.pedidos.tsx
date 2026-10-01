@@ -36,7 +36,7 @@ const filters: Array<{ id: OrderStatus | "todos"; label: string }> = [
 const paymentLabel = { pix: "PIX", dinheiro: "Dinheiro", cartao: "Cartão" } as const;
 
 function PedidosRestaurante() {
-  const { orders } = useApp();
+  const { orders, updateOrderPayment } = useApp();
   const [filter, setFilter] = useState<OrderStatus | "todos">("todos");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Order | null>(null);
@@ -83,7 +83,7 @@ function PedidosRestaurante() {
         <table className="w-full text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              {["Código", "Cliente", "Horário", "Produtos", "Total", "Pagamento", "Endereço", "Status"].map(
+              {["Código", "Cliente", "Horário", "Produtos", "Total", "Pagamento", "Endereço", "Status", "Pago"].map(
                 (header) => (
                   <th key={header} className="px-4 py-3 font-semibold">
                     {header}
@@ -115,6 +115,9 @@ function PedidosRestaurante() {
                 <td className="px-4 py-3">
                   <OrderStatusBadge status={order.status} />
                 </td>
+                <td className="px-4 py-3">
+                  <PaidToggle paid={order.paid} onToggle={() => updateOrderPayment(order.id, !order.paid)} />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -140,11 +143,43 @@ function PedidosRestaurante() {
               <span className="text-muted-foreground">{paymentLabel[order.payment]}</span>
               <span className="font-extrabold text-foreground">{currency(order.total)}</span>
             </p>
+            <div className="mt-3">
+              <PaidToggle paid={order.paid} onToggle={() => updateOrderPayment(order.id, !order.paid)} />
+            </div>
           </button>
         ))}
       </div>
 
       {selected && <OrderReceipt order={selected} onClose={() => setSelected(null)} />}
     </RestaurantLayout>
+  );
+}
+
+function PaidToggle({ paid, onToggle }: { paid: boolean; onToggle: () => void }) {
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      title={paid ? "Clique para desmarcar" : "Marcar como pago"}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          e.stopPropagation();
+          onToggle();
+        }
+      }}
+      className={cn(
+        "inline-flex cursor-pointer whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold",
+        paid
+          ? "border-success bg-success text-success-foreground"
+          : "border-border bg-card text-muted-foreground",
+      )}
+    >
+      {paid ? "Pago ✓" : "Marcar como pago"}
+    </span>
   );
 }

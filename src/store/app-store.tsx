@@ -34,6 +34,7 @@ import {
   saveAddressDb,
   setPrimaryAddressDb,
   updateOrderStatusDb,
+  updateOrderPaymentDb,
   updateSettingsDb,
   updateStockDb,
   upsertProductDb,
@@ -86,6 +87,7 @@ interface AppStore extends State {
   setPrimaryAddress: (id: string) => void;
   placeOrder: (payment: PaymentMethod) => Promise<Order | null>;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
+  updateOrderPayment: (id: string, paid: boolean) => void;
   saveProduct: (product: Product) => void;
   removeProduct: (id: string) => void;
   toggleProduct: (id: string) => void;
@@ -366,7 +368,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           name: i.name,
           quantity: i.quantity,
           price: i.price + i.addons.reduce((s, a) => s + a.price, 0),
-          addons: i.addons.map((a) => a.name),
+          addons: i.addons.map((a) => a.id),
           note: i.note,
         })),
         subtotal,
@@ -394,6 +396,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         orders: prev.orders.map((o) => (o.id === id ? { ...o, status } : o)),
       }));
       guard(updateOrderStatusDb(id, status)).catch(() => {});
+    },
+    updateOrderPayment: (id, paid) => {
+      setState((prev) => ({
+        ...prev,
+        orders: prev.orders.map((o) => (o.id === id ? { ...o, paid } : o)),
+      }));
+      guard(updateOrderPaymentDb(id, paid)).catch(() => {});
     },
     saveProduct: (product) => {
       setState((prev) => ({
