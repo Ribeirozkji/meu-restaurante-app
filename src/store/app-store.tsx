@@ -369,6 +369,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           quantity: i.quantity,
           price: i.price + i.addons.reduce((s, a) => s + a.price, 0),
           addons: i.addons.map((a) => a.id),
+          addonNames: i.addons.map((a) => a.name),
           note: i.note,
         })),
         subtotal,
