@@ -23,6 +23,7 @@ import { currency, formatDate } from "@/utils/format";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/restaurante/")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Dashboard — Painel Sabor da Casa" },

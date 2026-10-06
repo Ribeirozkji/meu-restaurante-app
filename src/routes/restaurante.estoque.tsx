@@ -7,6 +7,7 @@ import { StatCard } from "@/components/restaurant/StatCard";
 import { Pill } from "@/components/shared/status-badge";
 
 export const Route = createFileRoute("/restaurante/estoque")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Estoque — Painel Sabor da Casa" },

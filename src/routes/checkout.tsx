@@ -10,8 +10,10 @@ import { cn } from "@/lib/utils";
 import { isOpenNow } from "@/config/restaurant";
 
 export const Route = createFileRoute("/checkout")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex" },
       { title: "Checkout — Sabor da Casa" },
       {
         name: "description",

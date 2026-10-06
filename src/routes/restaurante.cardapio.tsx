@@ -10,6 +10,7 @@ import { Pill } from "@/components/shared/status-badge";
 import type { CategoryId, Product } from "@/types";
 
 export const Route = createFileRoute("/restaurante/cardapio")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Gerenciar cardápio — Painel Sabor da Casa" },

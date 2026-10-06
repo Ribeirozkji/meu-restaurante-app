@@ -8,6 +8,7 @@ import { useApp } from "@/store/app-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/cardapio")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Cardápio digital — Restaurante Sabor da Casa" },

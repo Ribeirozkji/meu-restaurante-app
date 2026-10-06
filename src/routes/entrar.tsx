@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientLayout } from "@/layouts/ClientLayout";
 
 export const Route = createFileRoute("/entrar")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Entrar ou criar conta — Sabor da Casa" },

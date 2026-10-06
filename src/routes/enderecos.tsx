@@ -10,6 +10,7 @@ import type { Address } from "@/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/enderecos")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Meus endereços — Sabor da Casa" },

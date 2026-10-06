@@ -6,6 +6,7 @@ import { currency, formatDate } from "@/utils/format";
 import { OrderStatusBadge } from "@/components/shared/status-badge";
 
 export const Route = createFileRoute("/perfil")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Meu perfil — Sabor da Casa" },
