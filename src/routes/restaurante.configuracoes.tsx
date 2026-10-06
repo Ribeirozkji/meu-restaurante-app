@@ -7,6 +7,7 @@ import { currency } from "@/utils/format";
 import { calculateDeliveryFee } from "@/utils/delivery";
 
 export const Route = createFileRoute("/restaurante/configuracoes")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Configurações — Painel Sabor da Casa" },

@@ -8,6 +8,7 @@ import { OrderStatusBadge } from "@/components/shared/status-badge";
 import type { Customer } from "@/types";
 
 export const Route = createFileRoute("/restaurante/clientes")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Clientes — Painel Sabor da Casa" },

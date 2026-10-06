@@ -8,8 +8,10 @@ import type { OrderStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pedido/$id")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex" },
       { title: "Pedido realizado — Sabor da Casa" },
       {
         name: "description",

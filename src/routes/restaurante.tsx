@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { currentUserIsAdmin } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/restaurante")({
+  staticData: { sitemap: "exclude-subtree" },
   ssr: false,
   component: RestauranteGuard,
 });

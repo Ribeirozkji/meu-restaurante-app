@@ -10,6 +10,7 @@ import type { Order, OrderStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/restaurante/pedidos")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Pedidos — Painel Sabor da Casa" },

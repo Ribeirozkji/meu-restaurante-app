@@ -9,6 +9,7 @@ import type { Addon } from "@/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/produto/$id")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Detalhes do prato — Sabor da Casa" },

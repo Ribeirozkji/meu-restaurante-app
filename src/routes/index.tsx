@@ -6,6 +6,7 @@ import heroImage from "@/assets/cat-lanches.jpg";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Restaurante Sabor da Casa — Peça online com entrega" },

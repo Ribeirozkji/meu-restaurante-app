@@ -5,6 +5,7 @@ import { useApp } from "@/store/app-store";
 import { currency, formatKm } from "@/utils/format";
 
 export const Route = createFileRoute("/carrinho")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Meu carrinho — Sabor da Casa" },

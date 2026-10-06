@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { currentUserIsAdmin } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/restaurante/login")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Entrar no painel — Sabor da Casa" },

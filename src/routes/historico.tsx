@@ -5,6 +5,7 @@ import { currency, formatDate, formatTime } from "@/utils/format";
 import { OrderStatusBadge } from "@/components/shared/status-badge";
 
 export const Route = createFileRoute("/historico")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Meus pedidos — Sabor da Casa" },
