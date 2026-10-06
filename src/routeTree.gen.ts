@@ -18,6 +18,7 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as RestauranteRouteImport } from './routes/restaurante'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as RestauranteIndexRouteImport } from './routes/restaurante.index'
@@ -72,6 +73,11 @@ const PerfilRoute = PerfilRouteImport.update({
 const RestauranteRoute = RestauranteRouteImport.update({
   id: '/restaurante',
   path: '/restaurante',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PedidoIdRoute = PedidoIdRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
   '/restaurante': typeof RestauranteRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/restaurante/cardapio': typeof RestauranteCardapioRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/restaurante/cardapio': typeof RestauranteCardapioRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/historico': typeof HistoricoRoute
   '/perfil': typeof PerfilRoute
   '/restaurante': typeof RestauranteRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/restaurante/cardapio': typeof RestauranteCardapioRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/historico'
     | '/perfil'
     | '/restaurante'
+    | '/sitemap.xml'
     | '/pedido/$id'
     | '/produto/$id'
     | '/restaurante/cardapio'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/historico'
     | '/perfil'
+    | '/sitemap.xml'
     | '/pedido/$id'
     | '/produto/$id'
     | '/restaurante/cardapio'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/historico'
     | '/perfil'
     | '/restaurante'
+    | '/sitemap.xml'
     | '/pedido/$id'
     | '/produto/$id'
     | '/restaurante/cardapio'
@@ -264,6 +276,7 @@ export interface RootRouteChildren {
   HistoricoRoute: typeof HistoricoRoute
   PerfilRoute: typeof PerfilRoute
   RestauranteRoute: typeof RestauranteRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   PedidoIdRoute: typeof PedidoIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
 }
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/restaurante'
       fullPath: '/restaurante'
       preLoaderRoute: typeof RestauranteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pedido/$id': {
@@ -442,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   HistoricoRoute: HistoricoRoute,
   PerfilRoute: PerfilRoute,
   RestauranteRoute: RestauranteRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   PedidoIdRoute: PedidoIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,
 }
