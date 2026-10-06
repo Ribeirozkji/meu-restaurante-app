@@ -40,6 +40,26 @@ import {
   upsertProductDb,
 } from "@/lib/api";
 import { currentUserIsAdmin } from "@/lib/admin-auth";
+import { mapOrder } from "@/lib/api";
+
+function playNewOrderAlert() {
+  try {
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    [0, 0.35, 0.7].forEach((t) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.3);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(ctx.currentTime + t);
+      osc.stop(ctx.currentTime + t + 0.3);
+    });
+  } catch {
+    /* navegador sem áudio */
+  }
+}
 
 const CART_KEY = "sabor-da-casa-cart";
 
@@ -196,6 +216,42 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       .catch((error) => console.error("Falha ao carregar cliente", error));
     return () => {
       active = false;
+    };
+  }, [authVersion]);
+
+  // Pedidos em tempo real (RLS filtra o que cada um pode ver)
+  useEffect(() => {
+    const channel = supabase
+      .channel(`orders-live-${authVersion}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const id = (payload.old as { id?: string }).id;
+            setState((prev) => ({ ...prev, orders: prev.orders.filter((o) => o.id !== id) }));
+            return;
+          }
+          const order = mapOrder(payload.new as Record<string, unknown>);
+          setState((prev) => {
+            const exists = prev.orders.some((o) => o.id === order.id);
+            if (!exists && payload.eventType === "INSERT" && typeof window !== "undefined" &&
+              window.location.pathname.startsWith("/restaurante")) {
+              playNewOrderAlert();
+              toast.success(`Novo pedido ${order.code}!`);
+            }
+            return {
+              ...prev,
+              orders: exists
+                ? prev.orders.map((o) => (o.id === order.id ? order : o))
+                : [order, ...prev.orders],
+            };
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
     };
   }, [authVersion]);
 
