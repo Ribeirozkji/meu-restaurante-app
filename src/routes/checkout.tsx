@@ -7,6 +7,7 @@ import { useApp } from "@/store/app-store";
 import { buildPixPayload, currency, formatKm } from "@/utils/format";
 import type { PaymentMethod } from "@/types";
 import { cn } from "@/lib/utils";
+import { isOpenNow } from "@/config/restaurant";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -77,6 +78,10 @@ function Checkout() {
 
   async function confirm() {
     if (sending) return;
+    if (!isOpenNow(restaurant)) {
+      toast.error(`Restaurante fechado agora. Horário: ${restaurant.openingHours}`);
+      return;
+    }
     setSending(true);
     const order = await placeOrder(payment);
     setSending(false);
