@@ -199,6 +199,42 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     };
   }, [authVersion]);
 
+  // Pedidos em tempo real (RLS filtra o que cada um pode ver)
+  useEffect(() => {
+    const channel = supabase
+      .channel(`orders-live-${authVersion}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const id = (payload.old as { id?: string }).id;
+            setState((prev) => ({ ...prev, orders: prev.orders.filter((o) => o.id !== id) }));
+            return;
+          }
+          const order = mapOrder(payload.new as Record<string, unknown>);
+          setState((prev) => {
+            const exists = prev.orders.some((o) => o.id === order.id);
+            if (!exists && payload.eventType === "INSERT" && typeof window !== "undefined" &&
+              window.location.pathname.startsWith("/restaurante")) {
+              playNewOrderAlert();
+              toast.success(`Novo pedido ${order.code}!`);
+            }
+            return {
+              ...prev,
+              orders: exists
+                ? prev.orders.map((o) => (o.id === order.id ? order : o))
+                : [order, ...prev.orders],
+            };
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [authVersion]);
+
   const customer = useMemo(
     () => myCustomer ?? fallbackCustomer,
     [myCustomer],
