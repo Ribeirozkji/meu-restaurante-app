@@ -55,6 +55,31 @@ function ProdutoDetalhe() {
 
   return (
     <ClientLayout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            description: product.description,
+            image: [product.image],
+            offers: {
+              "@type": "Offer",
+              price: product.price.toFixed(2),
+              priceCurrency: "BRL",
+              availability: product.available
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: product.rating.toFixed(1),
+              reviewCount: Math.max(product.sales, 1),
+            },
+          }),
+        }}
+      />
       <Link
         to="/cardapio"
         className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
