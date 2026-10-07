@@ -28,7 +28,7 @@ export const Route = createFileRoute("/cardapio")({
 });
 
 function Cardapio() {
-  const { products } = useApp();
+  const { products, restaurant } = useApp();
   const [category, setCategory] = useState<string>("todos");
   const [query, setQuery] = useState("");
 
@@ -63,6 +63,10 @@ function Cardapio() {
 
   return (
     <ClientLayout showSearch={search}>
+      <h1 className="mb-4 text-2xl font-extrabold text-foreground sm:text-3xl">
+        Cardápio Digital — {restaurant.name}
+      </h1>
+
       <section className="card-surface mb-6 flex flex-col gap-3 overflow-hidden bg-gradient-brand p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary-foreground/80">
@@ -100,6 +104,7 @@ function Cardapio() {
         ))}
       </div>
 
+      <h2 className="sr-only">Itens do cardápio</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((product) => (
           <ProductCard key={product.id} product={product} />

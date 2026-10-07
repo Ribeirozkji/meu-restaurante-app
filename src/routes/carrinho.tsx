@@ -35,7 +35,12 @@ function Carrinho() {
       <ClientLayout>
         <div className="card-surface flex flex-col items-center gap-4 p-12 text-center">
           <ShoppingBag className="h-10 w-10 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Seu carrinho está vazio.</p>
+          <h1 className="text-xl font-extrabold text-foreground sm:text-2xl">
+            Seu carrinho está vazio
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Escolha um prato no cardápio para começar seu pedido.
+          </p>
           <Link
             to="/cardapio"
             className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
@@ -53,6 +58,7 @@ function Carrinho() {
 
       <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
         <div className="space-y-3">
+          <h2 className="text-lg font-extrabold text-foreground">Itens no Carrinho</h2>
           {cart.map((item) => {
             const unit = item.price + item.addons.reduce((s, a) => s + a.price, 0);
             return (
@@ -115,10 +121,11 @@ function Carrinho() {
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          <h2 className="text-lg font-extrabold text-foreground">Resumo do Pedido</h2>
           <div className="card-surface p-4">
-            <p className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
               <MapPin className="h-4 w-4 text-primary" /> Endereço de entrega
-            </p>
+            </h3>
             {selectedAddress ? (
               <div className="mt-2 text-sm text-muted-foreground">
                 <p className="font-semibold text-foreground">{selectedAddress.label}</p>
