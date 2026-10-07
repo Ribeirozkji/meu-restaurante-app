@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clock, MapPin, Phone, ShieldCheck, Truck, UtensilsCrossed } from "lucide-react";
 import { useApp } from "@/store/app-store";
-import { isOpenNow } from "@/config/restaurant";
+import { defaultRestaurant, isOpenNow } from "@/config/restaurant";
 import heroImage from "@/assets/cat-lanches.jpg";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,45 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content: "Cardápio digital oficial: lanches, almoço, jantar, bebidas e sobremesas.",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Restaurant",
+          name: defaultRestaurant.name,
+          description: defaultRestaurant.tagline,
+          image: [window.location.origin + "/favicon.png"],
+          logo: window.location.origin + "/favicon.png",
+          telephone: "+55-81-3333-1020",
+          servesCuisine: ["Brasileira", "Lanches"],
+          priceRange: "R$",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "Rua das Palmeiras, 320 — Boa Viagem",
+            addressLocality: "Recife",
+            addressRegion: "PE",
+            addressCountry: "BR",
+          },
+          openingHoursSpecification: [
+            {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ],
+              opens: "07:00",
+              closes: "23:00",
+            },
+          ],
+        }),
       },
     ],
   }),
