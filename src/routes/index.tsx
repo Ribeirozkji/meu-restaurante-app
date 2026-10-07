@@ -90,6 +90,9 @@ function Home() {
           <div className="space-y-3">
             <h1 className="text-3xl font-extrabold text-primary-foreground sm:text-5xl">
               {restaurant.name}
+              <span className="mt-2 block text-lg font-bold text-primary-foreground/90 sm:text-2xl">
+                Peça online com entrega
+              </span>
             </h1>
             <p className="text-base text-primary-foreground/85 sm:text-lg">
               {restaurant.tagline}
